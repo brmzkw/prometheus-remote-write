@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: hv101
+    static_configs:
+      - targets:
+        - my-hypervisor
+
+remote_write:
+  - url: http://prometheus:9090/api/v1/write
