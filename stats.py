@@ -22,25 +22,26 @@ memory_metrics = Gauge(
 def update_stats():
     cpu_data = collections.defaultdict(int)
 
-    for node in range(10):
-        val = int(random.random() * 100)
+    for project in ('my-project0', 'my-project1', 'my-project2'):
+        for node in range(10):
+            val = int(random.random() * 100)
 
-        cpu_data[node] += val
+            cpu_data[node] += val
 
-        print(f'Set cpu={cpu_data[node]} and memory={val} for {node}')
-        cpu_metrics.labels(
-            project_id=f'XXXPROJECT{node}',
-            resource_type='instance_fake_monitoring',
-            resource_id=f'fffffff-fffff-{node}',
-            resource_name=f'Server {node}'
-        ).set(cpu_data[node])
+            print(f'Set cpu={cpu_data[node]} and memory={val} for {node}')
+            cpu_metrics.labels(
+                project_id=project,
+                resource_type='instance_fake_monitoring',
+                resource_id=f'fffffff-fffff-{node}',
+                resource_name=f'Server {node}'
+            ).set(cpu_data[node])
 
-        memory_metrics.labels(
-            project_id=f'XXXPROJECT{node}',
-            resource_type='instance_fake_monitoring',
-            resource_id=f'fffffff-fffff-{node}',
-            resource_name=f'Server {node}'
-        ).set(val)
+            memory_metrics.labels(
+                project_id=project,
+                resource_type='instance_fake_monitoring',
+                resource_id=f'fffffff-fffff-{node}',
+                resource_name=f'Server {node}'
+            ).set(val)
 
 
 if __name__ == '__main__':
