@@ -1,26 +1,50 @@
 #!/usr/bin/env python
 
 
-from prometheus_client import start_http_server, Summary
+import collections
 import random
 import time
 
+from prometheus_client import Gauge, start_http_server
 
-# Create a metric to track time spent and requests made.
-REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
 
-# Decorate function with metric.
-@REQUEST_TIME.time()
-def process_request(t):
-    """A dummy function that takes some time."""
-    print(f'process request, sleep {t}s...')
-    time.sleep(t)
+cpu_metrics = Gauge(
+    'instance_fake_cpu_seconds_total', 'Fake amount of CPU used',
+    ['project_id', 'resource_type', 'resource_id', 'resource_name']
+)
+
+memory_metrics = Gauge(
+    'instance_fake_memory_usage_bytes', 'Fake amount of memory used',
+    ['project_id', 'resource_type', 'resource_id', 'resource_name']
+)
+
+
+def update_stats():
+    cpu_data = collections.defaultdict(int)
+
+    for node in range(10):
+        val = int(random.random() * 100)
+
+        cpu_data[node] += val
+
+        print(f'Set cpu={cpu_data[node]} and memory={val} for {node}')
+        cpu_metrics.labels(
+            project_id=f'XXXPROJECT{node}',
+            resource_type='instance_fake_monitoring',
+            resource_id=f'fffffff-fffff-{node}',
+            resource_name=f'Server {node}'
+        ).set(cpu_data[node])
+
+        memory_metrics.labels(
+            project_id=f'XXXPROJECT{node}',
+            resource_type='instance_fake_monitoring',
+            resource_id=f'fffffff-fffff-{node}',
+            resource_name=f'Server {node}'
+        ).set(val)
+
 
 if __name__ == '__main__':
-    print('starting http server')
-    # Start up the server to expose the metrics.
     start_http_server(8000)
-    # Generate some requests.
     while True:
-        t = int(random.random() * 10)
-        process_request(t)
+        update_stats()
+        time.sleep(1)
